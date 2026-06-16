@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>codebase-qa-rag — local code assistant</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #181b22; --panel2: #1f232c; --border: #2a2f3a;
+    --text: #e6e9ef; --muted: #97a0b0; --accent: #5b8cff; --accent2: #ffb454;
+    --ok: #5ad19a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  header { padding: 28px 24px 8px; max-width: 980px; margin: 0 auto; }
+  h1 { margin: 0; font-size: 24px; letter-spacing: -0.2px; }
+  h1 .mono { font-family: "JetBrains Mono", Consolas, monospace; color: var(--accent); }
+  .sub { color: var(--muted); margin-top: 4px; font-size: 14px; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px 24px 64px; }
+  .controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  select, textarea {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 10px; font-size: 14px; outline: none;
+  }
+  select:focus, textarea:focus { border-color: var(--accent); }
+  .ask-row { display: flex; gap: 12px; align-items: flex-end; }
+  textarea { flex: 1; resize: vertical; min-height: 64px; font-family: inherit; }
+  button {
+    background: var(--accent); color: #0b0d12; border: none; border-radius: 8px;
+    padding: 12px 22px; font-size: 15px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  }
+  button:disabled { opacity: .5; cursor: default; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+           padding: 18px 20px; margin-top: 18px; }
+  .panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted);
+              margin: 0 0 10px; }
+  #answer { white-space: normal; }
+  #answer code { background: #11141a; padding: 1px 5px; border-radius: 4px;
+                 font-family: Consolas, monospace; font-size: 13px; color: #d7e0ff; }
+  .cite { background: rgba(91,140,255,.16); color: var(--accent); border: 1px solid rgba(91,140,255,.35);
+          padding: 0 6px; border-radius: 5px; font-family: Consolas, monospace; font-size: 12.5px; }
+  .sources li { font-family: Consolas, monospace; font-size: 13px; color: var(--muted);
+                list-style: none; padding: 5px 0; border-bottom: 1px dashed var(--border); }
+  .sources li b { color: var(--text); }
+  .sources .score { float: right; color: var(--accent2); }
+  .meta { color: var(--muted); font-size: 12.5px; margin-top: 12px; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #0b0d12;
+             border-top-color: transparent; border-radius: 50%; animation: spin .7s linear infinite;
+             vertical-align: -2px; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .hidden { display: none; }
+  .badge { display:inline-block; background:var(--panel2); border:1px solid var(--border);
+           color:var(--ok); border-radius:20px; padding:2px 10px; font-size:12px; margin-left:8px;}
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="mono">codebase-qa-rag</span> <span class="badge">100% local</span></h1>
+  <div class="sub">Ask natural-language questions about a codebase. Retrieval + a small coder model
+    (Qwen2.5-Coder 3B) run entirely on your machine through Ollama — no code leaves the device.</div>
+</header>
+<main>
+  <div class="controls">
+    <div class="field"><label>Codebase</label><select id="codebase"></select></div>
+    <div class="field"><label>Chunking</label><select id="strategy"></select></div>
+    <div class="field"><label>Retrieval</label><select id="method"></select></div>
+  </div>
+  <div class="ask-row">
+    <textarea id="question" placeholder="e.g. How does user authentication work?"></textarea>
+    <button id="ask">Ask</button>
+  </div>
+
+  <div id="answerPanel" class="panel hidden">
+    <h2>Answer</h2>
+    <div id="answer"></div>
+    <div class="meta" id="meta"></div>
+  </div>
+
+  <div id="sourcesPanel" class="panel hidden">
+    <h2>Retrieved sources</h2>
+    <ul class="sources" id="sources"></ul>
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const API = ""; // same origin
+
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function renderAnswer(text){
+  let h = esc(text);
+  h = h.replace(/\[([A-Za-z0-9_./\\-]+\.[A-Za-z0-9]+)\]/g, '<span class="cite">$1</span>');
+  h = h.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  h = h.replace(/`([^`]+)`/g, '<code>$1</code>');
+  h = h.replace(/\n/g, '<br>');
+  return h;
+}
+
+async function loadOptions(){
+  const o = await (await fetch(API + "/options")).json();
+  const fill = (el, arr, def) => { arr.forEach(v => {
+    const opt = document.createElement("option"); opt.value = v; opt.textContent = v;
+    if (v === def) opt.selected = true; el.appendChild(opt); }); };
+  fill($("codebase"), o.codebases, o.defaults.codebase);
+  fill($("strategy"), o.strategies, o.defaults.strategy);
+  fill($("method"), o.methods, o.defaults.method);
+}
+
+async function ask(){
+  const question = $("question").value.trim();
+  if (!question) return;
+  const btn = $("ask");
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Thinking…';
+  try {
+    const res = await fetch(API + "/query", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        question, codebase: $("codebase").value,
+        strategy: $("strategy").value, method: $("method").value })
+    });
+    const data = await res.json();
+    $("answerPanel").classList.remove("hidden");
+    if (data.error) { $("answer").innerHTML = "<em>Error: " + esc(data.error) + "</em>"; }
+    else { $("answer").innerHTML = renderAnswer(data.answer || "(empty)"); }
+    const c = data.config || {};
+    $("meta").textContent =
+      `${c.model} · ${c.codebase}/${c.strategy}/${c.method} · ` +
+      `retrieve ${data.retrieve_ms} ms · generate ${data.generate_ms} ms`;
+    const ul = $("sources"); ul.innerHTML = "";
+    (data.retrieved || []).forEach(r => {
+      const li = document.createElement("li");
+      li.innerHTML = `<b>${esc(r.rel_path)}</b>:${r.start_line}-${r.end_line}` +
+                     `<span class="score">${r.score}</span>`;
+      ul.appendChild(li);
+    });
+    $("sourcesPanel").classList.remove("hidden");
+  } catch (e) {
+    $("answerPanel").classList.remove("hidden");
+    $("answer").innerHTML = "<em>Request failed: " + esc(String(e)) + "</em>";
+  } finally { btn.disabled = false; btn.textContent = "Ask"; }
+}
+
+$("ask").addEventListener("click", ask);
+$("question").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) ask(); });
+loadOptions();
+</script>
+</body>
+</html>
