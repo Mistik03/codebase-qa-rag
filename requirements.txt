@@ -1,0 +1,27 @@
+# Core RAG stack
+chromadb>=0.5.0
+rank-bm25>=0.2.2
+numpy>=1.26
+
+# AST-aware chunking (tree-sitter). tree-sitter-language-pack ships prebuilt
+# Python + TypeScript grammars and tracks the modern tree-sitter API.
+tree-sitter>=0.21
+tree-sitter-language-pack>=0.2.0
+
+# Local model serving is via Ollama HTTP API (no SDK needed)
+requests>=2.31
+PyYAML>=6.0
+
+# Web API
+fastapi>=0.110
+uvicorn[standard]>=0.29
+
+# Analysis + figures
+pandas>=2.0
+matplotlib>=3.8
+
+# Document generation (thesis / slides / setup guide)
+python-docx>=1.1
+python-pptx>=0.6.23
+reportlab>=4.0
+pypdf>=4.0

@@ -1,0 +1,54 @@
+# Central configuration for the local codebase-QA RAG system.
+# Everything runs locally through Ollama; no code leaves the machine.
+
+ollama:
+  base_url: "http://localhost:11434"
+  request_timeout: 600        # seconds; 8B judge on a 6 GB GPU can be slow
+  gen_model: "qwen2.5-coder:3b"
+  embed_model: "nomic-embed-text"
+  judge_model: "llama3.1:8b"
+
+embedding:
+  # nomic-embed-text works best with task prefixes.
+  document_prefix: "search_document: "
+  query_prefix: "search_query: "
+  batch_size: 16
+
+chunking:
+  # Token budgets are approximated as ~4 characters per token.
+  window_tokens: 400          # naive fixed-window size
+  overlap_tokens: 60          # naive window overlap
+  max_chunk_tokens: 900       # hard cap for component / AST chunks before splitting
+
+retrieval:
+  top_k: 6                    # chunks fed to the generator
+  candidate_k: 20             # candidates each retriever returns before fusion
+  rrf_k: 60                   # reciprocal-rank-fusion constant
+
+generation:
+  temperature: 0.1
+  num_ctx: 8192               # Qwen2.5-Coder context window used for answering
+  max_tokens: 600
+  repeat_penalty: 1.15        # curb the small model's tendency to loop
+
+# Codebases under test. FormFit is private/local; Microblog is cloned at setup.
+codebases:
+  formfit:
+    language: angular
+    root: "C:/Users/User5537/source/repos/Desoft/FormFit/src"
+    include_ext: [".ts", ".html", ".css", ".scss"]
+    exclude_dirs: ["node_modules", ".angular", "dist", "out-tsc", "android", ".git", "assets"]
+    exclude_glob: ["*.spec.ts", "*.d.ts"]
+  microblog:
+    language: python
+    root: "external/microblog"
+    include_ext: [".py", ".html"]
+    exclude_dirs: ["migrations", "venv", ".venv", "__pycache__", ".git", "tests", "node_modules"]
+    exclude_glob: ["conftest.py"]
+
+storage:
+  chroma_dir: ".chroma"
+
+paths:
+  benchmark_dir: "benchmark"
+  results_dir: "experiments/results"

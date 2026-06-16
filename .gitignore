@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Vector store / runtime artifacts
+.chroma/
+storage/
+*.chroma
+.cache/
+
+# Third-party codebases (cloned at setup time, not vendored)
+external/
+
+# Node / Angular (web/)
+node_modules/
+web/dist/
+web/.angular/
+web/.angular/cache/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Keep experiment outputs and figures tracked
+!experiments/results/
+!experiments/results/*.csv
+!experiments/results/*.png

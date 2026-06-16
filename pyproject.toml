@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "coderag"
+version = "0.1.0"
+description = "A fully local RAG system for codebase question-answering (SEEU Capstone)"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Arb Xhelili" }]
+license = { text = "MIT" }
+dependencies = [
+    "chromadb>=0.5.0",
+    "rank-bm25>=0.2.2",
+    "numpy>=1.26",
+    "tree-sitter>=0.21",
+    "tree-sitter-language-pack>=0.2.0",
+    "requests>=2.31",
+    "PyYAML>=6.0",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
