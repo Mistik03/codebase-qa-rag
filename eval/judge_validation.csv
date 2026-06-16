@@ -1,0 +1,13 @@
+idx,codebase,strategy,method,qid,recall,judge_score,manual_score,note
+0,microblog,naive,dense,mb-01,0.67,4,4,Correct: login route + Flask-Login + werkzeug password hashing.
+11,microblog,naive,hybrid,mb-02,1.00,4,4,Correct: followers association table and User relationships.
+22,microblog,component,dense,mb-03,0.67,3,2,"Wrong mechanism: describes a DB/ORM query, misses Elasticsearch + SearchableMixin."
+33,microblog,component,hybrid,mb-04,0.67,3,3,Partial: covers token verification but omits how a token is issued via basic auth.
+44,microblog,ast,dense,mb-05,0.50,4,4,Correct: create_app factory and blueprint registration with url_prefix.
+55,microblog,ast,hybrid,mb-06,0.75,4,4,Correct: reset token + send_password_reset_email flow.
+66,formfit,naive,dense,ff-07,0.00,3,2,"Wrong: describes scattered console.error, misses GlobalErrorHandler (retrieval recall 0)."
+77,formfit,naive,hybrid,ff-08,0.00,4,3,"Plausible but ungrounded and partly invented; retrieval recall 0."
+88,formfit,component,dense,ff-09,0.00,3,3,Partial: right service/Supabase idea but invented method names; recall 0.
+99,formfit,component,hybrid,ff-10,0.00,3,2,"Wrong: claims NgModule/AppModule bootstrap, but app is standalone (recall 0)."
+110,formfit,ast,hybrid,ff-01,0.75,4,4,Correct: Supabase auth, signup validation, signUp call.
+116,formfit,ast,hybrid,ff-07,0.33,4,4,Correct: GlobalErrorHandler skips chunk errors, shows toast, dev-only logging.
