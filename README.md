@@ -36,14 +36,16 @@ that is itself validated against manual grading.
 
 ## How it works
 
-```
-codebase ─► loaders ─► chunker ─► embeddings (nomic-embed-text) ─► ChromaDB
-                                                                      │
-question ───────────────────────────────────────►  retriever  ◄──────┘
-                                          (dense | hybrid: dense + BM25, RRF)
-                                                      │  top-k chunks
-                                                      ▼
-                            Qwen2.5-Coder 3B  ─►  answer + file citations
+```mermaid
+flowchart LR
+    subgraph Indexing
+        A["codebase"] --> B["loaders"] --> C["chunker"] --> D["embeddings (nomic-embed-text)"] --> E[("ChromaDB")]
+    end
+    subgraph Querying
+        Q(["question"]) --> R{"retriever: dense or hybrid (dense + BM25, RRF)"}
+        R -->|top-k chunks| G["Qwen2.5-Coder 3B"] --> ANS(["answer + file citations"])
+    end
+    E --> R
 ```
 
 ## Requirements
