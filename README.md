@@ -65,7 +65,7 @@ python -m experiments.analyze
 uvicorn api.main:app --reload
 ```
 
-See [`docs/SetupGuide.pdf`](docs/SetupGuide.pdf) for a complete walkthrough.
+The steps above are enough to index a project and start asking questions.
 
 ## Repository layout
 
@@ -77,7 +77,6 @@ See [`docs/SetupGuide.pdf`](docs/SetupGuide.pdf) for a complete walkthrough.
 | `benchmark/` | Hand-labelled QA datasets (`*.jsonl`) |
 | `experiments/` | Grid runner, analysis, results (CSV + figures) |
 | `eval/` | LLM-judge validation against manual grades |
-| `docs/` | Thesis, presentation, setup guide |
 
 ## License
 

@@ -15,6 +15,9 @@ storage/
 # Third-party codebases (cloned at setup time, not vendored)
 external/
 
+# Thesis documents are delivered to the supervisor directly, not published here
+docs/
+
 # Node / Angular (web/)
 node_modules/
 web/dist/
