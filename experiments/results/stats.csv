@@ -1,0 +1,13 @@
+comparison,dimension,metric,n,mean_a,mean_b,mean_diff,t,p_value,significant_0.05
+ast vs naive,chunking,Recall@k,40,0.65,0.529,0.121,3.93,0.0003,yes
+ast vs naive,chunking,Judge,40,3.775,3.7,0.075,0.845,0.403,no
+ast vs naive,chunking,MRR,40,0.742,0.639,0.103,1.967,0.0563,no
+ast vs component,chunking,Recall@k,40,0.65,0.494,0.156,4.948,0.0,yes
+ast vs component,chunking,Judge,40,3.775,3.638,0.137,2.054,0.0468,yes
+ast vs component,chunking,MRR,40,0.742,0.658,0.084,1.5,0.1415,no
+naive vs component,chunking,Recall@k,40,0.529,0.494,0.035,1.148,0.2578,no
+naive vs component,chunking,Judge,40,3.7,3.638,0.062,1.094,0.2808,no
+naive vs component,chunking,MRR,40,0.639,0.658,-0.019,-0.419,0.6778,no
+hybrid vs dense,retrieval,Recall@k,40,0.578,0.537,0.041,1.482,0.1464,no
+hybrid vs dense,retrieval,Judge,40,3.75,3.658,0.092,1.984,0.0543,no
+hybrid vs dense,retrieval,MRR,40,0.747,0.612,0.135,3.55,0.001,yes
