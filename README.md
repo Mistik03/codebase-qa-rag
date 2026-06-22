@@ -108,21 +108,23 @@ python eval/validate_judge.py      # LLM-judge vs. manual-grading agreement
 
 ## Results
 
-Averaged across both codebases (full numbers in
-[`experiments/results/summary.md`](experiments/results/summary.md)):
+Averaged across both codebases over a 40-question benchmark (20 per project; full numbers in
+[`experiments/results/summary.md`](experiments/results/summary.md), significance tests in
+[`stats.md`](experiments/results/stats.md)):
 
 | Chunking | Recall@k | MRR | Judge (1–5) |
 |----------|:--------:|:---:|:-----------:|
-| naive | 0.46 | 0.62 | 3.67 |
-| component | 0.36 | 0.57 | 3.62 |
-| **ast** | **0.55** | **0.65** | **3.77** |
+| naive | 0.53 | 0.64 | 3.70 |
+| component | 0.49 | 0.66 | 3.64 |
+| **ast** | **0.65** | **0.74** | **3.77** |
 
 ![Recall@k by chunking strategy](experiments/results/fig_recall_by_strategy.png)
 
-- **AST-aware chunking wins** overall and on both codebases; its lead over the naive baseline grows on the larger, more fragmented Angular project.
-- **Hybrid retrieval** beats dense on ranking and recall (MRR 0.66 vs 0.57).
+- **AST-aware chunking wins** on both codebases; its recall gain over the other two strategies is **statistically significant** (paired t-test, p < 0.001).
+- **Hybrid retrieval** beats dense on ranking and recall, significantly improving MRR (0.75 vs 0.61).
 - **Component grouping underperformed** — a useful negative result: bundling several files into one chunk dilutes its embedding and hurts retrieval.
-- **Judge reliability:** on a manually re-graded subset, the LLM judge agreed exactly 67% of the time and within one point 100% of the time (with a mild leniency).
+- **Judge reliability:** on a manually re-graded subset the LLM judge agreed exactly 67% of the time and within one point 100% of the time (mildly lenient).
+- Evaluated on one Angular and one Python project, so these are **case studies**, not general claims about either ecosystem.
 
 ## Project layout
 
